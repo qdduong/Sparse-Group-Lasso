@@ -43,4 +43,9 @@ sigma0 = np.array([st.sigma_function(x) for x in X])
 with open('gamma0_sigma0.pickle', 'wb') as handle:
     pickle.dump(gamma0, handle, protocol=pickle.HIGHEST_PROTOCOL)
     pickle.dump(sigma0, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    
+with open('samples.pickle', 'wb') as handle:
+    pickle.dump(Y, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    pickle.dump(X, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    pickle.dump(knots, handle, protocol=pickle.HIGHEST_PROTOCOL)
 # =============================================================================    
