@@ -41,6 +41,10 @@ class CV(object):
         resu=[]
         for i in range(self.n_splits):
             sgl_i = SGL(self.y_train[i], self.X_train[i], self.sgl.knots, self.sgl.u, lbda1, alpha1, lbda2, alpha2)
+            K, p = self.sgl.knots.shape
+            cf = np.ones((K-1)*p + 1)
+            init_coefs = np.concatenate((-cf, cf))
+            sgl_i.initialize_coefficient(init_coefs)
             gamma_i, sigma_i = sgl_i.fit_predict(self.X_test[i])
             resu.append(np.mean(l(self.y_test[i], gamma_i, sigma_i)))
         resu = np.asarray(resu)
