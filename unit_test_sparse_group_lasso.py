@@ -6,6 +6,7 @@ Created on Wed Jun 20 10:51:42 2018
 """
 
 from sparse_group_lasso import SGL
+from cross_validation import CV
 import numpy as np
 import utils as ut
 
@@ -48,4 +49,8 @@ sgl.initialize_coefficient(coefs)
 sgl.define_groups()
 #%%
 #out=ut.partial_f_beta0(sgl.coef_, sgl.y, sgl.knots, sgl.splrep, sgl.proj_matrix, sgl.u
-sgl.fit()
+#sgl.fit()
+#%%
+cv = CV(sgl)
+cv.param_ = np.array([sgl.lbda1, sgl.alpha1, sgl.lbda2, sgl.alpha2])
+out = cv.k_fold_cross_validation()

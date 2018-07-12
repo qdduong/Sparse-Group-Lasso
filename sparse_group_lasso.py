@@ -5,7 +5,7 @@ Created on Mon Jun 18 13:53:04 2018
 @author: Quang Dien Duong
 """
 
-from utils import get_splrep, get_regfunc, get_projecting_matrix, return_group_to_index, discard_group, discard_component, get_coef_exclude_ind, obj_func, gradient_f_beta0, gradient_f_theta0
+from utils import l2, get_splrep, get_regfunc, get_projecting_matrix, return_group_to_index, discard_group, block_wise_descent_fitting, get_coef_exclude_ind, gradient_f_beta0, gradient_f_theta0
 from scipy.optimize import fmin_l_bfgs_b
 import numpy as np
 
@@ -35,6 +35,9 @@ class SGL(object):
     def define_groups(self):
         self.groups = return_group_to_index(self.coef_, self.knots)
         
+    def copy(self):
+        return self
+        
     def fit(self):
         # sparse group lasso selection on kappa
         distance = 1.
@@ -49,18 +52,9 @@ class SGL(object):
                     self.coef_[gr] = 0.
                 # 2- If the group is not zero-ed out, update each component
                 else:
-                    for ind_sparse in gr:
-                        tmp_coefs_k = self.coef_.copy()
-                        tmp_coefs_k[ind_sparse] = 0.
-                        if discard_component(self.y, self.knots, tmp_coefs_k, self.splrep, self.proj_matrix, self.u, self.lbda1, self.alpha1, ind_sparse):
-                            self.coef_[ind_sparse] = 0.
-                        else:
-                            coef_excl_ind_sparse = get_coef_exclude_ind(self.coef_, ind_sparse)
-                            resu, ignored1, ignored2 = fmin_l_bfgs_b(func= obj_func, x0=0.,
-                                                                     args=(coef_excl_ind_sparse, ind_sparse, self.y, self.knots, self.splrep,
-                                                                           self.proj_matrix, self.u, self.lbda1, self.alpha1, self.lbda2, self.alpha2),
-                                                                           approx_grad=True)
-                            self.coef_[ind_sparse] = resu                      
+                    self.coef_[gr] = block_wise_descent_fitting(self.coef_, self.y, self.knots, self.splrep, self.proj_matrix, self.u, self.lbda1, self.alpha1, gr)
+                         
+            
             # sparse group lasso selection on tau
             for gr in self.groups[1][1:]:
             # 1- Should the group be zero-ed out?
@@ -70,23 +64,12 @@ class SGL(object):
                     self.coef_[gr] = 0.
                 # 2- If the group is not zero-ed out, update each component
                 else:
-                    for ind_sparse in gr:
-                        tmp_coefs_k = self.coef_.copy()
-                        tmp_coefs_k[ind_sparse] = 0.
-                        if discard_component(self.y, self.knots, tmp_coefs_k, self.splrep, self.proj_matrix, self.u, self.lbda2, self.alpha2, ind_sparse):
-                            self.coef_[ind_sparse] = 0.
-                        else:
-                            coef_excl_ind_sparse = get_coef_exclude_ind(self.coef_, ind_sparse)
-                            resu, ignored1, ignored2 = fmin_l_bfgs_b(func= obj_func, x0=0.,
-                                                                     args=(coef_excl_ind_sparse, ind_sparse, self.y, self.knots, self.splrep, self.proj_matrix, self.u,
-                                                                           self.lbda1, self.alpha1, self.lbda2, self.alpha2),
-                                                                           approx_grad=True)
-                            self.coef_[ind_sparse] = resu    
+                    self.coef_[gr] = block_wise_descent_fitting(self.coef_, self.y, self.knots, self.splrep, self.proj_matrix, self.u, self.lbda2, self.alpha2, gr)
+                    
             # estimate beta_0
             ind_beta0 = int(self.groups[0][0])
             beta0_old = self.coef_[ind_beta0]
             coef_excl_beta0 = get_coef_exclude_ind(self.coef_, ind_beta0)
-            #beta0_new = newton(func= gradient_f_beta0, x0= beta0_old, args=(coef_excl_beta0, ind_beta0, self.y, self.knots, self.splrep, self.proj_matrix, self.u))
             beta0_new, ignored1, ignored2 = fmin_l_bfgs_b(func=gradient_f_beta0, x0=beta0_old, 
                                       args=(coef_excl_beta0, ind_beta0, self.y, self.knots, self.splrep, self.proj_matrix, self.u), approx_grad=True) 
             self.coef_[ind_beta0] = beta0_new
@@ -94,14 +77,13 @@ class SGL(object):
             ind_theta0 = int(self.groups[1][0])
             theta0_old = self.coef_[ind_theta0]
             coef_excl_theta0 = get_coef_exclude_ind(self.coef_, ind_theta0)
-            #theta0_new = newton(func= gradient_f_theta0, x0= theta0_old, args=(coef_excl_theta0, ind_theta0, self.y, self.knots, self.splrep, self.proj_matrix, self.u))
             theta0_new, ignored3, ignored4 = fmin_l_bfgs_b(func=gradient_f_theta0, x0= theta0_old,
                                        args=(coef_excl_theta0, ind_theta0, self.y, self.knots, self.splrep, self.proj_matrix, self.u), approx_grad=True)
             self.coef_[ind_theta0] = theta0_new
             # update_nb_iter
             nb_iter += 1
             # update_distance
-            distance = np.linalg.norm(self.coef_ - coefs_old)
+            distance = l2(self.coef_ - coefs_old)
         return self
         
     def predict(self, x):

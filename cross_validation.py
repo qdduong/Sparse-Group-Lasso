@@ -15,7 +15,7 @@ import numpy as np
 __author__ = 'Quang Dien Duong quangdien.duong[at]gmail.com'
 
 class CV(object):
-    def __init__(self, sgl,  n_splits=3):
+    def __init__(self, sgl,  n_splits=5):
         assert type(sgl) == SGL, "sgl must be a Sparse_group_lasso object"
         self.sgl = sgl
         self.n_splits = n_splits
@@ -35,6 +35,9 @@ class CV(object):
             self.y_train.append(y_train)
             self.y_test.append(y_test)   
             self.splrep_train.append(get_splrep(X_train, self.sgl.knots))
+            
+    def initialize_parameters(self, param):
+        self.param_ = param
             
     def k_fold_cross_validation(self):
         lbda1, alpha1, lbda2, alpha2 = self.param_

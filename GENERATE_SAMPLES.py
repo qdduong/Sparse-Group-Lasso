@@ -10,7 +10,6 @@ __author__ = 'Quang Dien Duong quangdien.duong[at]gmail.com'
 
 import setting as st
 import numpy as np
-import utils as ut
 import pickle
 
 np.random.seed(1000)
@@ -33,8 +32,6 @@ l1 = list(np.sort(np.random.uniform(size=34)))
 l2 = list(np.sort(np.random.uniform(size=34)))
 l3 = list(np.sort(np.random.uniform(size=34)))
 knots = np.array([l1,l2,l3]).T
-splrep = ut.get_splrep(X, knots)
-proj_matrix = ut.get_projecting_matrix(knots)
 # =============================================================================
 # Generate samples 
 # =============================================================================
@@ -46,11 +43,4 @@ sigma0 = np.array([st.sigma_function(x) for x in X])
 with open('gamma0_sigma0.pickle', 'wb') as handle:
     pickle.dump(gamma0, handle, protocol=pickle.HIGHEST_PROTOCOL)
     pickle.dump(sigma0, handle, protocol=pickle.HIGHEST_PROTOCOL)
-    
-with open('samples.pickle', 'wb') as handle:
-    pickle.dump(Y, handle, protocol=pickle.HIGHEST_PROTOCOL)
-    pickle.dump(X, handle, protocol=pickle.HIGHEST_PROTOCOL)
-    pickle.dump(knots, handle, protocol=pickle.HIGHEST_PROTOCOL)
-    pickle.dump(splrep, handle, protocol=pickle.HIGHEST_PROTOCOL)
-    pickle.dump(proj_matrix, handle, protocol=pickle.HIGHEST_PROTOCOL)
 # =============================================================================    
