@@ -90,7 +90,7 @@ class SGL(object):
         splrep_x = get_splrep(x, self.knots, self.X)
         coefs_reshap = self.coef_.reshape((2, int(len(self.coef_)/2)))
         beta = coefs_reshap[0]
-        theta = coefs_reshap[0]
+        theta = coefs_reshap[1]
         gamma = np.exp(get_regfunc(beta, splrep_x, self.proj_matrix))
         sigma = np.exp(get_regfunc(theta, splrep_x, self.proj_matrix))
         return gamma, sigma

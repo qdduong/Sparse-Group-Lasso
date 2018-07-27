@@ -10,6 +10,8 @@ import NCSRep as ncs
 
 __author__ = 'Quang Dien Duong quangdien.duong[at]gmail.com'
 
+#%%
+
 def l1(x):
     """
         x: array
@@ -25,6 +27,17 @@ def l2(x):
     Return norm L2 of an array x
     """
     return np.linalg.norm(x,2)
+
+def surface(coef, X, Y):
+    return coef[0] + coef[1]*X + coef[2]*Y + coef[3]*(X**2) + coef[4]*(X*Y) + coef[5]*(Y**2) + coef[6]*(X**3) + coef[7]*(X**2)*Y + coef[8]*X*(Y**2) + coef[9]*(Y**3)
+
+
+def f(coef, X, Y, Z):
+    Z0 = surface(coef, X, Y)
+    out = (Z0-Z)**2
+    return np.mean(out)
+
+#%%
 
 def get_splrep(x, knots, Xi=None):
     """
@@ -300,7 +313,7 @@ def optimize_step_size(coefs, y, knots, splrep, proj_matrix, u, lbda, alpha, ind
         loss_new = loss(coefs_new, y, knots, splrep, proj_matrix, u, 0., 0., 0., 0.)
     return t
 
-def block_wise_descent_fitting(coefs, y, knots, splrep, proj_matrix, u, lbda, alpha, indices_group, rtol=1e-6):
+def block_wise_descent_fitting(coefs, y, knots, splrep, proj_matrix, u, lbda, alpha, indices_group, rtol=1e-6, max_iter=1000):
     """
         This method is meant to implement the block wise descent algorithm. 
     """    
@@ -309,7 +322,7 @@ def block_wise_descent_fitting(coefs, y, knots, splrep, proj_matrix, u, lbda, al
     mu_old = coefs.copy()
     tmp_mu = mu_old
     tmp_coefs = coefs.copy()
-    while cond > rtol:
+    while cond > rtol and l <= max_iter:
         mu_old = tmp_mu
         coefs_old = tmp_coefs
         t = optimize_step_size(coefs_old, y, knots, splrep, proj_matrix, u, lbda, alpha, indices_group)
@@ -388,4 +401,6 @@ def gradient_f_theta0(x0, coef_k, ind, y, knots, splrep, proj_matrix, u):
     """
     x0 = float(x0)
     coefs = get_coef_include_ind(coef_k, x0, ind)
-    return abs(partial_f_theta0(coefs, y, knots, splrep, proj_matrix, u))    
+    return abs(partial_f_theta0(coefs, y, knots, splrep, proj_matrix, u))
+
+    

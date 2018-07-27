@@ -32,14 +32,15 @@ def sigma_function(x):
     """
         x: array-type. In our setup, x is a tridimensional vector, i.e. x = [x1, x2, x3] 
     """
-    resu = 10 + 0.2*x[0] + 0.05*x[0]**2 + 0.5*x[1]
+    #resu = 10*(x[0]**4 + x[1]**4 + 2)
+    resu = 10.0
     return resu
     
 def gamma_function(x):
     """
         x: array-type. In our setup, x is a tridimensional vector, i.e. x = [x1, x2, x3] 
     """
-    resu = (0.1 + 0.25*x[0] + 0.05*x[1] + norm.pdf((x[0]-0.05)/0.2) + norm.pdf((x[1]+0.05)/0.5))
+    resu = 0.5*(x[0]**2 - x[1]**2 + 1.4)
     return resu
 
 def generate_GPD_samples(x, default_seed=1660):
