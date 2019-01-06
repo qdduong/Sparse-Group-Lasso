@@ -16,23 +16,51 @@ import pickle
 
 import Local_Polynomial_Basis_Functions as LP
 
-yi = np.array([0.1, 0.2, 0.3, 0.4, 0.5, 0.6])
-Xi = np.array([[0, 0.05],
-               [0.2, 0.25],
-               [0.4, 0.45],
-               [0.6, 0.65],
-               [0.8, 0.85],
-               [1, 1.05]])
-x = np.array([0.5, 0.5])
+#yi = np.array([0.1, 0.2, 0.3, 0.4, 0.5, 0.6])
+#Xi = np.array([[0, 0.05],
+#               [0.2, 0.25],
+#               [0.4, 0.45],
+#               [0.6, 0.65],
+#               [0.8, 0.85],
+#               [1, 1.05]])
+#x = np.array([0.5, 0.5])
 
-h = 0.6
-u = 0.25
+#h = 0.6
+#u = 0.25
 
-Xi = Xi[yi>=u]
-yi = yi[yi>=u] - u
-coefs = np.array([0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 1., 1., 1., 1., 1., 1.])
+#Xi = Xi[yi>=u]
+#yi = yi[yi>=u] - u
+#coefs = np.array([0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 1., 1., 1., 1., 1., 1.])
 
-resu = LP.get_neg_log_likelihood(coefs=coefs, x=x, Xi=Xi, yi=yi, bandwidth=h, degree=2) # Expected result is 0.926913
+#resu = LP.get_neg_log_likelihood(coefs=coefs, x=x, Xi=Xi, yi=yi, bandwidth=h, degree=2) # Expected result is 0.926913
+
+#%%
+def get_interpolation_matrix(matrix):
+    out = []
+    N = len(matrix)
+    M = len(matrix[0])
+    for i in range(N):
+        tmp = []
+        for j in range(M-1):
+            tmp.append(matrix[i,j])
+            tmp.append((matrix[i,j]+matrix[i,j+1])/2)
+        tmp.append(matrix[i,M-1])
+        out.append(tmp)
+    return np.asarray(out)
+
+def expand_matrix(matrix):
+    M1 = get_interpolation_matrix(matrix)
+    M2 = get_interpolation_matrix(M1.T)
+    return M2.T
+
+#====================================================
+# Test expand_matrix
+#====================================================
+A = np.array([[1,2,3],
+              [4,5,6],
+              [7,8,9]])
+    
+print(expand_matrix(A))
 
 #%%
 #def gamma0(x):
